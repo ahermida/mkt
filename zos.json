@@ -1,0 +1,7 @@
+{
+  "name": "Mkt",
+  "version": "0.1.0",
+  "contracts": {
+    "Mkt": "Mkt"
+  }
+}

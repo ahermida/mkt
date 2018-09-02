@@ -1,0 +1,32 @@
+{
+  "contracts": {
+    "Wavey": {
+      "address": "0x45fade70258cdaeac089ff7cc6697865f7092d6e",
+      "bytecodeHash": "37fbbc73374dadb41d093634ee375fe9bd1ae9314684f5591a1b3ea2303ed5ed"
+    }
+  },
+  "proxies": {
+    "Wavey": [
+      {
+        "address": "0x93688a001ed3a6397fb7216de1cc02316e37237e",
+        "version": "0.1.0",
+        "implementation": "0xe487aefc1349deca24187a6b3bef76e263a796b3"
+      },
+      {
+        "address": "0xda2ca957dee05fde07bba7714b9b5f9878e9106d",
+        "version": "0.1.0",
+        "implementation": "0x45fade70258cdaeac089ff7cc6697865f7092d6e"
+      }
+    ]
+  },
+  "app": {
+    "address": "0x731d476efe38ce1fad2bfa7122ef0d71853abe1a"
+  },
+  "version": "0.1.0",
+  "package": {
+    "address": "0xb7a9e9728de24ccc50ca97eb497ef43d2381f384"
+  },
+  "provider": {
+    "address": "0x142fca30a3c47f37ff9a88bd1978c8ef741a744a"
+  }
+}

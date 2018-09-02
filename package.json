@@ -1,0 +1,15 @@
+{
+  "name": "mkt",
+  "version": "0.0.1",
+  "description": "PKI built on Ethereum and IPFS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Albert Hermida <alberthermida@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "openzeppelin-zos": "^1.9.1",
+    "zos-lib": "^1.3.0"
+  }
+}
