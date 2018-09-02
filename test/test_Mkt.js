@@ -62,11 +62,19 @@ contract('Mkt', accounts => {
       assert.notEqual(first, second);
     });
 
+    //just fetch user key and make sure it's what we put in earlier (public key 1)
     it('gets key', async () => {
       await mkt.newUser(web3.fromAscii('Albert'), web3.fromAscii('public key 1'), {from: user});
       let pk = await mkt.getKey(web3.fromAscii('Albert'));
       assert.equal(web3.toUtf8(pk), 'public key 1');
     });
+
+    it('deletes users from registry', async () => {
+      await mkt.newUser(web3.fromAscii('Albert'), web3.fromAscii('public key'));
+      await mkt.remove(web3.fromAscii('Albert'));
+      let contains = await mkt.contains(web3.fromAscii('Albert'));
+      assert.equal(contains, false);
+    })
   });
 
 });
