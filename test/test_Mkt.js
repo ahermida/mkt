@@ -17,7 +17,7 @@ contract('Mkt', accounts => {
     await mkt.sendTransaction({data: callData, from: owner});
   });
 
-  describe('user crud', () => {
+  describe('mkt & proxied user crud', () => {
 
     //creates users
     it('creates users without problem', async () => {
@@ -74,7 +74,7 @@ contract('Mkt', accounts => {
       await mkt.remove(web3.fromAscii('Albert'));
       let contains = await mkt.contains(web3.fromAscii('Albert'));
       assert.equal(contains, false);
-    })
+    });
   });
 
 });
