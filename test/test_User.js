@@ -1,6 +1,5 @@
 const user = artifacts.require('User');
 const encodeCall = require('zos-lib/lib/helpers/encodeCall').default;
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 contract('Mkt', accounts => {
   const owner = accounts[1];
