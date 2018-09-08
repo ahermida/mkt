@@ -38,7 +38,7 @@ export default class Peer extends EventEmitter {
       }
     });
 
-    //listen to channel for responses
+    //listen to channel for responses, create connections from them
     this.channel.on('message', m => {
       let parsed;
       try {
@@ -136,7 +136,7 @@ export default class Peer extends EventEmitter {
   makeDataChannel() {
 
     // data channels apparently need to be made before doing anything important
-    this.dataChannel = this.rtc.createDataChannel('wavey');
+    this.dataChannel = this.rtc.createDataChannel('mkt');
     this.dataChannel.onopen = () => this.emit('connection')
     this.dataChannel.onmessage = m => this.handleMessage(m.data);
     this.dataChannel.onerror = this.handleErr;
@@ -175,6 +175,10 @@ export default class Peer extends EventEmitter {
     this.rtc.setRemoteDescription(answer);
   }
 
+  handleErr(e) {
+    console.log('Error in signaling', this.id, e);
+  }
+
   //decrypt a stringified object and return it
   decrypt(obj) {
     let parsed;
@@ -185,9 +189,5 @@ export default class Peer extends EventEmitter {
       console.log('Error in trying to decrypt signaling data. Did you use the proper shared key?');
     }
     return parsed;
-  }
-
-  handleErr(e) {
-    console.log('Error in signaling', this.id, e);
   }
 }

@@ -35,6 +35,8 @@ export default class Mkt extends EventEmitter {
             pubsub: true,
         },
     });
+
+    //Let ourselves know we're ready
     this.ipfs.once('ready', () => ipfs.id((err, info) => {
         if (err) { throw err }
         this.ipfsID = info.id;

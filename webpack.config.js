@@ -33,7 +33,7 @@ const client = {
 */
 const server = {
   entry: ['babel-polyfill','./src/server/index.js'],
-  output: { path: __dirname + '/dist', filename: 'server.bundle.js' },
+  output: { path: __dirname + '/build/js', filename: 'server.bundle.js' },
   target: 'node',
   externals: [nodeExternals()],
 };
@@ -41,9 +41,8 @@ const server = {
 const api = {
   entry: ['babel-polyfill', './src/api/index.js'],
   output: {
-    path: __dirname + '/dist',
+    path: __dirname + '/build/js',
     filename: 'api.bundle.js',
-    publicPath: '/static/',
   },
   target: 'web',
 };

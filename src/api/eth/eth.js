@@ -5,8 +5,10 @@ import { fromUtf8, toUtf8 } from 'ethjs';
 import abi from 'ethjs-abi';
 import Mkt from './Mkt.js';
 import User from './User.js';
-const MKT_ADDRESS = '0x2026b3cdbad858ac1dfaaf9fa9c1c3e8a9efdc63'; // Ropsten
-const MKT_NETWORK = 'Ropsten';
+
+//expects environment variable for mkt address & network
+const MKT_ADDRESS = process.env.MKT_ADDRESS;
+const MKT_NETWORK = process.env.MKT_NETWORK;
 
 export default class Core {
 
@@ -16,6 +18,13 @@ export default class Core {
     this.ec = ec;
     this.MKT_ADDRESS = MKT_ADDRESS;
     this.mkt = new Mkt(this.eth, MKT_ADDRESS);
+    this.username = '';
+  }
+
+  //target user and return it
+  async login(username) {
+    const address = await this.mkt.getPublicKey(username);
+    return new User(this.eth, this.account, address);
   }
 
   //create new user
@@ -58,6 +67,7 @@ export default class Core {
     };
   }
 
+  //change a user's private key (if we're the owner)
   async changePK(user) {
 
     //generate keys
