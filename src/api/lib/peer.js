@@ -135,7 +135,7 @@ export default class Peer extends EventEmitter {
 
   makeDataChannel() {
 
-    // data channels apparently need to be made before doing anything important
+    //data channels apparently need to be made before doing anything important
     this.dataChannel = this.rtc.createDataChannel('mkt');
     this.dataChannel.onopen = () => this.emit('connection')
     this.dataChannel.onmessage = m => this.handleMessage(m.data);

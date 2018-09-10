@@ -70,41 +70,54 @@ export default class Mkt extends EventEmitter {
 
         //if peer not yet seen, derive sk and try to create peer
         let peerID = parsed.id
-        if (!this.peers[peerID]) {
-          const user = await this.core.getUserByName(peerID);
-          if (user) {
-            const sk = await this._deriveSK(user);
-
-            //create peer
-            this.peers[peerID] = new Peer(peerID, sk, new Channel({ room: this.room, id }));
-
-            //listen for disconnects, delete if need be
-            this.peers[peerID].on('disconnect', () => {
-              if (!this.peers[peerID].connected()) {
-                delete this.peers[peerID];
-                console.log(peerID, "disconnected");
-              }
-            });
-
-            //when we connect to a peer, remove peer
-            this.peers[peerID].on('connect', () => {
-              console.log(peerID, "connected");
-              this.emit('peer', this.peers[peerID]);
-            });
-          }
-        }
+        this.getPeer(peerID);
       });
     })
   }
 
-  //connect to another peer
-  connect(username) {
+  //connect to peer
+  async connect(username) {
+    const peer = await getPeer(username);
+    if (peer) {
+      peer.initialize();
+      return peer;
+    }
+  }
 
+  //setup peer object
+  async getPeer(username) {
+
+    //if peer not yet seen, derive sk and try to create peer
+    if (!this.peers[username]) {
+      const user = await this.core.mkt.contains(username);
+      if (user) {
+        const sk = await this._deriveSK(user);
+
+        //create peer with room
+        this.peers[username] = new Peer(username, sk, new Channel({ room: this.room }), this.webrtc);
+
+        //listen for disconnects, delete if need be
+        this.peers[username].on('disconnect', () => {
+          if (!this.peers[username].connected()) {
+            delete this.peers[username];
+            console.log(username, "disconnected");
+          }
+        });
+
+        //when we connect to a peer, remove peer
+        this.peers[username].on('connect', () => {
+          console.log(username, "connected");
+          this.emit('peer', this.peers[username]);
+        });
+
+        return this.peers[username];
+      }
+    }
   }
 
   //Derive shared key
   async _deriveSK(user) {
-    const pub = await user.getPublicKey();
+    const pub = await this.core.mkt.getPublicKey(user);
     const pubk = this.ec.keyFromPublic(pub, 'hex');
     return this.pk.derive(pubk).toString(16);
   }

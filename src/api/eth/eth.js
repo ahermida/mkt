@@ -22,7 +22,7 @@ export default class Core {
   }
 
   //target user and return it
-  async login(username) {
+  async getUser(username) {
     const address = await this.mkt.getPublicKey(username);
     return new User(this.eth, this.account, address);
   }
