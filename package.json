@@ -4,7 +4,6 @@
   "description": "PKI built on Ethereum and IPFS",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "webpack-dev-server --hot --open",
     "build": "webpack",
     "compile": "truffle compile",
     "start": "npm run build && node dist/server.bundle.js & npm run watch",

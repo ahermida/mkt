@@ -2,10 +2,10 @@ const path = require('path');
 const webpack = require('webpack');
 const nodeExternals = require('webpack-node-externals');
 
-const common = {
+const nodeCommon = {
   devtool: 'eval',
   resolve: {
-    extensions: ['.js', '.jsx']
+    extensions: ['.js']
   },
   module: {
     rules: [{
@@ -17,6 +17,21 @@ const common = {
         test: /\.css$/,
         use: [ 'style-loader', 'css-loader' ]
       }
+    ]
+  }
+};
+
+const clientCommon = {
+  devtool: 'source-map',
+  module: {
+    loaders: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader"
+        }
+      },
     ]
   }
 };
@@ -42,13 +57,23 @@ const api = {
   entry: ['babel-polyfill', './src/api/index.js'],
   output: {
     path: __dirname + '/build/js',
+    filename: 'api.node.bundle.js',
+  },
+  target: 'node',
+  externals: [nodeExternals()],
+};
+
+const clientApi = {
+  entry: ['./src/api/index.js'],
+  output: {
+    path: __dirname + '/build/js',
     filename: 'api.bundle.js',
   },
   target: 'web',
-};
+}
 
 module.exports = [
-//  Object.assign({}, common, client),
-  Object.assign({}, common, server),
-  Object.assign({}, common, api)
+  Object.assign({}, nodeCommon, server),
+  Object.assign({}, nodeCommon, api),
+  Object.assign({}, clientCommon, clientApi),
 ];
