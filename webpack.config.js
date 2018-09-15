@@ -22,18 +22,19 @@ const nodeCommon = {
 };
 
 const clientCommon = {
-  devtool: 'source-map',
+  devtool: 'eval',
   module: {
-    loaders: [
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: "babel-loader"
-        }
-      },
-    ]
-  }
+    loaders: [{
+      test: /\.js$/,
+      loaders: ['babel-loader'],
+      include: path.join(__dirname, 'src')
+    }, { test: /\.json$/, loader: 'json-loader' }]
+  },
+  node: {
+    fs: 'empty',
+    net: 'empty',
+    tls: 'empty'
+  },
 };
 /*
 const client = {
@@ -64,13 +65,12 @@ const api = {
 };
 
 const clientApi = {
-  entry: ['./src/api/index.js'],
+  entry: ['babel-polyfill', './src/api/index.js'],
   output: {
     path: __dirname + '/build/js',
     filename: 'api.bundle.js',
   },
-  target: 'web',
-}
+};
 
 module.exports = [
   Object.assign({}, nodeCommon, server),

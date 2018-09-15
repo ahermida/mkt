@@ -1,5 +1,8 @@
 node_modules
 .DS_Store
+api.node.bundle.js
+api.bundle.js
+server.bundle.js
 
 # Logs
 logs

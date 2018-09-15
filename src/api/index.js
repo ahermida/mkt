@@ -1,7 +1,6 @@
 /**
  * API for p2p interaction based on usernames
  */
-import IPFS from 'ipfs';
 import Core from './eth/eth.js';
 import { getEth } from './eth/ethutil.js';
 import Peer from './lib/peer.js';
@@ -13,40 +12,19 @@ import elliptic from 'elliptic';
 export default class Mkt extends EventEmitter {
 
   //setup requires a user's id, eth, and optionally webrtc for Node.js Users
-  constructor(id, pk, webrtc) {
+  constructor({ipfs, id, pk, webrtc}) {
     super();
     this.id = id;
+    this.pk = pk ? this.ec.keyFromSecret(pk, 'hex') : "";
     this.peers = {};
+    this.ipfs = ipfs;
     this.webrtc = webrtc;
     this.eth = null;
     this.core = null;
     this.ec = new elliptic.ec('secp256k1');
-    this.pk = this.ec.keyFromSecret(pk, 'hex');
-    this.ipfs = new IPFS({
-        repo: id,
-        config: {
-          Addresses: {
-            Swarm: [
-              '/dns4/ws-star.discovery.libp2p.io/tcp/443/wss/p2p-websocket-star',
-            ],
-          },
-        },
-        EXPERIMENTAL: {
-            pubsub: true,
-        },
-    });
+    this.room = null;
 
-    //Let ourselves know we're ready
-    this.ipfs.once('ready', () => ipfs.id((err, info) => {
-        if (err) { throw err }
-        this.ipfsID = info.id;
-        this.emit('ipfs');
-    }));
-
-    //listen for messages in a room labeled by your name.
-    this.room = Room(ipfs, `WNS#${id}`);
-
-    //setup Eth api
+    //setup eth api
     getEth().then(async (eth) => {
       this.eth = eth;
       const accounts = await eth.accounts();
@@ -54,9 +32,24 @@ export default class Mkt extends EventEmitter {
       this.emit('eth');
     });
 
-    //once our eth API is ready, start setting up new connections
-    this.on('eth', () => {
-      this.room.on('message', async (message) => {
+    //if we have an id and private key -> get started listening for connections
+    if (this.id && this.pk) {
+      this.on('eth', () => this.listen(this.id, this.pk));
+    }
+  }
+
+  //listen to new connection
+  listen(id, pk) {
+
+    if (!this.ipfs || !this.ipfs.pubsub) {
+      throw new Error('Cannot listen to messages without IPFS (with pubsub enabled)');
+    }.
+
+    //listen for messages in a room labeled by your name.
+    this.room = Room(ipfs, `mkt#${id}`);
+
+    //listen to eth booting up
+    this.room.on('message', async (message) => {
         let parsed;
         try {
           parsed = JSON.parse(message.data);
@@ -67,12 +60,10 @@ export default class Mkt extends EventEmitter {
           return;
         }
 
-
         //if peer not yet seen, derive sk and try to create peer
         let peerID = parsed.id
         this.getPeer(peerID);
-      });
-    })
+    });
   }
 
   //connect to peer

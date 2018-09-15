@@ -12,6 +12,7 @@
    try {
      await eth.blockNumber();
    } catch (e) {
+     console.log('localhost:8545 provider failed, defaulting to ropsten via infura');
 
      //method wouldn't work if we're not actually connected to anything, so switch to ropsten
      eth.setProvider(new Eth.HttpProvider('https://ropsten.infura.io'));
