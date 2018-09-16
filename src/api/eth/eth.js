@@ -6,19 +6,16 @@ import abi from 'ethjs-abi';
 import Mkt from './Mkt.js';
 import User from './User.js';
 
-//expects environment variable for mkt address & network
-const MKT_ADDRESS = process.env.MKT_ADDRESS;
-const MKT_NETWORK = process.env.MKT_NETWORK;
-
 export default class Core {
 
   constructor(eth, account, ec) {
     this.eth = eth;
     this.account = account;
     this.ec = ec;
-    this.MKT_ADDRESS = MKT_ADDRESS;
-    this.mkt = new Mkt(this.eth, MKT_ADDRESS);
-    this.username = '';
+
+    //expects environment variable for mkt address & network
+    const MKT_ADDRESS = process ? process.env.MKT_ADDRESS : "address";
+    this.mkt = new Mkt(this.eth, this.account, MKT_ADDRESS);
   }
 
   //target user and return it
@@ -31,7 +28,7 @@ export default class Core {
   async newUser(username) {
 
     //Generate keys
-    const key = ec.genKeyPair();
+    const key = this.ec.genKeyPair();
     const keys = {
       public: key.getPublic().encode('hex'),
       private: key.getPrivate().toString(16)

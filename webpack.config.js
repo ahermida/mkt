@@ -8,27 +8,27 @@ const nodeCommon = {
     extensions: ['.js']
   },
   module: {
-    rules: [{
-        test: /\.jsx?$/,
-        use: ['babel-loader'],
-        include: path.join(__dirname, 'src')
-      },
+    rules: [
       {
-        test: /\.css$/,
-        use: [ 'style-loader', 'css-loader' ]
+        test: /\.(js|jsx)$/,
+        use: 'babel-loader',
+        exclude: /node_modules/,
+
       }
     ]
-  }
+  },
 };
 
 const clientCommon = {
   devtool: 'eval',
   module: {
-    loaders: [{
-      test: /\.js$/,
-      loaders: ['babel-loader'],
-      include: path.join(__dirname, 'src')
-    }, { test: /\.json$/, loader: 'json-loader' }]
+    rules: [
+      {
+        test: /\.(js|jsx)$/,
+        use: 'babel-loader',
+        exclude: /node_modules/,
+      }
+    ]
   },
   node: {
     fs: 'empty',
@@ -58,6 +58,7 @@ const api = {
   entry: ['babel-polyfill', './src/api/index.js'],
   output: {
     path: __dirname + '/build/js',
+    libraryTarget: 'umd',
     filename: 'api.node.bundle.js',
   },
   target: 'node',

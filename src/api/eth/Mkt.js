@@ -4,7 +4,6 @@ import { fromUtf8, toUtf8 } from 'ethjs';
 //Part of PKI on Ethereum
 export default class Mkt {
   constructor(eth, account, address) {
-    this.address = address;
     this.mkt = eth.contract(mkt.abi, mkt.bytecode, {
       from: account,
       gas: 300000,
@@ -25,6 +24,7 @@ export default class Mkt {
 
   //Insert a new user into the user registry, owned by sender
   async newUser(name, pk) {
+
     const tx = await this.mkt.newUser(fromUtf8(name), fromUtf8(pk));
     return tx;
   }

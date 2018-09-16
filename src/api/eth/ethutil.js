@@ -3,7 +3,10 @@
  //get provider
  export async function getEth() {
    let provider;
-   if (typeof window.web3 !== 'undefined' && typeof window.web3.currentProvider !== 'undefined') {
+
+   if (typeof window !== 'undefined' &&
+       typeof window.web3 !== 'undefined' &&
+       typeof window.web3.currentProvider !== 'undefined') {
      provider = window.web3.currentProvider;
    } else {
      provider = new Eth.HttpProvider('http://localhost:8545');
