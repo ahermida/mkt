@@ -32,10 +32,10 @@ contract Mkt is Ownable {
     /**
      * @dev Insert a new user into the user registry, owned by sender
      */
-    function newUser(bytes32 _id, bytes32 _pk) public payable returns (address) {
+    function newUser(bytes32 _id, bytes32 _pka, bytes32 _pkb) public payable returns (address) {
         // require(msg.value > 5 finney);
         User user = new User();
-        user.initialize(_id, _pk, msg.sender);
+        user.initialize(_id, _pka, _pkb, msg.sender);
         insert(_id, address(user), msg.sender);
         emit CreateUser(_id, address(user));
         return address(user);
@@ -110,10 +110,10 @@ contract Mkt is Ownable {
     /**
      * @dev Get public key for a particular handle
      */
-    function getKey(bytes32 handle) public view returns (bytes32) {
+    function getKey(bytes32 handle) public view returns (bytes32, bytes32) {
         require(contains(handle));
         User user = User(register[handle].user);
-        return user.pk();
+        return (user.getPK());
     }
 
     /**

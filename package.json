@@ -42,7 +42,6 @@
     "babel-polyfill": "^6.26.0",
     "body-parser": "^1.18.2",
     "bulma": "^0.6.1",
-    "ethjs": "^0.3.1",
     "express": "^4.16.2",
     "ipfs": "^0.31.7",
     "ipfs-pubsub-room": "^1.4.0",

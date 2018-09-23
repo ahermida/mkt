@@ -2,7 +2,7 @@
  * API for p2p interaction based on usernames
  */
 import Core from './eth/eth.js';
-import { getEth } from './eth/ethutil.js';
+import { getWeb3 } from './eth/ethutil.js';
 import Peer from './lib/peer.js';
 import Channel from './lib/signal.js';
 import Room from 'ipfs-pubsub-room';
@@ -19,16 +19,15 @@ export default class App extends EventEmitter {
     this.peers = {};
     this.ipfs = ipfs;
     this.webrtc = webrtc;
-    this.eth = null;
     this.core = null;
     this.ec = new elliptic.ec('secp256k1');
     this.room = null;
 
     //setup eth api
-    getEth().then(async (eth) => {
-      this.eth = eth;
-      const accounts = await eth.accounts();
-      this.core = new Core(eth, accounts[0], this.ec);
+    getWeb3().then(async (web3) => {
+      this.web3 = web3;
+      const accounts = await web3.eth.getAccounts();
+      this.core = new Core(web3, accounts[0], this.ec);
       this.emit('eth');
     });
 

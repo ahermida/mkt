@@ -1,19 +1,21 @@
 import user from '../../../build/contracts/User.json';
-import { fromUtf8, toUtf8 } from 'ethjs';
+import { utils } from 'web3';
 
 //Part of PKI on Ethereum
 export default class User {
   constructor(eth, account, address) {
+    this.account = account;
     this.address = address;
-    this.user = eth.contract(user.abi, user.bytecode, {
+    this.user = new web3.eth.Contract(user.abi, address, {
       from: account,
       gas: 300000,
-    }).at(address);
+      data: user.bytecode,
+    });
   }
 
   //shouldn't be used directly, prefer use from api
-  async changePK(pubKey) {
-    const tx = await this.user.changePK(fromUtf8(pubKey));
+  async changePK(pka, pkb) {
+    const tx = await this.user.methods.changePK(utils.fromAscii(pka), utils.fromAscii(pkb)).send({from: this.account});
     return tx;
   }
 }

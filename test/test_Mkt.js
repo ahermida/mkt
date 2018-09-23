@@ -21,13 +21,13 @@ contract('Mkt', accounts => {
 
     //creates users
     it('creates users without problem', async () => {
-      await mkt.newUser(web3.fromAscii('Albert'), web3.fromAscii('public key'));
+      await mkt.newUser(web3.fromAscii('Albert'), web3.fromAscii('public key'), web3.fromAscii('public key'));
       let resp = await mkt.contains(web3.fromAscii('Albert'));
       assert.equal(resp, true);
     });
 
     it('checks for contained users properly', async () => {
-      await mkt.newUser(web3.fromAscii('Albert'), web3.fromAscii('public key'));
+      await mkt.newUser(web3.fromAscii('Albert'), web3.fromAscii('public key'), web3.fromAscii('public key'));
       let contains = await mkt.contains(web3.fromAscii('Albert'));
       let notContains = await mkt.contains(web3.fromAscii('Jonathan'));
       assert.equal(contains, true);
@@ -35,7 +35,7 @@ contract('Mkt', accounts => {
     })
 
     it('queries users created', async () => {
-      await mkt.newUser(web3.fromAscii('Albert'), web3.fromAscii('public key'));
+      await mkt.newUser(web3.fromAscii('Albert'), web3.fromAscii('public key'), web3.fromAscii('public key'));
       let resp = await mkt.getUser(web3.fromAscii('Albert'));
       assert.notEqual(resp, ZERO_ADDRESS);
     });
@@ -46,7 +46,7 @@ contract('Mkt', accounts => {
 
     //edits users
     it('edits handle owner', async () => {
-      await mkt.newUser(web3.fromAscii('Albert'), web3.fromAscii('public key 1'), {from: user});
+      await mkt.newUser(web3.fromAscii('Albert'), web3.fromAscii('public key 1'), web3.fromAscii('public key'), {from: user});
       let firstOwner = await mkt.getOwner(web3.fromAscii('Albert'));
       await mkt.transfer(web3.fromAscii('Albert'), friend, {from: user});
       let secondOwner = await mkt.getOwner(web3.fromAscii('Albert'));
@@ -55,7 +55,7 @@ contract('Mkt', accounts => {
 
     //edits user's address
     it('updates user address for a particular owned name', async () => {
-      await mkt.newUser(web3.fromAscii('Albert'), web3.fromAscii('public key 1'), {from: user});
+      await mkt.newUser(web3.fromAscii('Albert'), web3.fromAscii('public key 1'), web3.fromAscii('public key'), {from: user});
       let first = await mkt.getUser(web3.fromAscii('Albert'));
       await mkt.update(web3.fromAscii('Albert'), friend, {from: user});
       let second = await mkt.getUser(web3.fromAscii('Albert'));
@@ -64,13 +64,14 @@ contract('Mkt', accounts => {
 
     //just fetch user key and make sure it's what we put in earlier (public key 1)
     it('gets key', async () => {
-      await mkt.newUser(web3.fromAscii('Albert'), web3.fromAscii('public key 1'), {from: user});
-      let pk = await mkt.getKey(web3.fromAscii('Albert'));
-      assert.equal(web3.toUtf8(pk), 'public key 1');
+      await mkt.newUser(web3.fromAscii('Albert'), web3.fromAscii('public key 1'), web3.fromAscii('public key'), {from: user});
+      let resp = await mkt.getKey(web3.fromAscii('Albert'));
+      assert.equal(web3.toUtf8(resp[0]), 'public key 1');
+      assert.equal(web3.toUtf8(resp[1]), 'public key');
     });
 
     it('deletes users from registry', async () => {
-      await mkt.newUser(web3.fromAscii('Albert'), web3.fromAscii('public key'));
+      await mkt.newUser(web3.fromAscii('Albert'), web3.fromAscii('public key'), web3.fromAscii('public key'));
       await mkt.remove(web3.fromAscii('Albert'));
       let contains = await mkt.contains(web3.fromAscii('Albert'));
       assert.equal(contains, false);

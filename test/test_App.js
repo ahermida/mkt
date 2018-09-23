@@ -6,11 +6,11 @@ const IPFS = require('ipfs');
 const wrtc = require('wrtc');
 const MktContract = artifacts.require('Mkt');
 const encodeCall = require('zos-lib/lib/helpers/encodeCall').default;
-const Eth = require('ethjs');
+const Web3 = require('web3');
 const ethContract = require('../build/contracts/Mkt.json');
 
 //get provider
-export async function getEth() {
+async function getWeb3() {
   let provider;
 
   if (typeof window !== 'undefined' &&
@@ -18,19 +18,20 @@ export async function getEth() {
       typeof window.web3.currentProvider !== 'undefined') {
     provider = window.web3.currentProvider;
   } else {
-    provider = new Eth.HttpProvider('http://localhost:8545');
+    provider = new Web3.providers.HttpProvider('http://localhost:8545');
   }
-  let eth = new Eth(provider);
+  let web3 = new Web3(provider);
   try {
-    await eth.blockNumber();
+    await web3.eth.getBlockNumber();
   } catch (e) {
     console.log('localhost:8545 provider failed, defaulting to ropsten via infura');
 
     //method wouldn't work if we're not actually connected to anything, so switch to ropsten
-    eth.setProvider(new Eth.HttpProvider('https://ropsten.infura.io'));
+    web3.setProvider(new Web3.providers.HttpProvider('https://ropsten.infura.io'));
   }
-  return eth;
+  return web3;
 }
+
 
 const ipfs = new IPFS({
     repo: 'mkt',
@@ -62,15 +63,20 @@ contract('Mkt', accounts => {
   });
 
   describe('mkt api test', () => {
-    let eth = getEth();
     it('actually works', async () => {
+
+      //summon ethjs and grab accounts
+      let web3 = await getWeb3();
+      let accounts = await web3.eth.getAccounts();
+      let account = accounts[0];
 
       //startup app
       const app = new Mkt({ipfs, webrtc: wrtc});
 
       //create new user
       app.on('eth', async () => {
-        const user = await app.core.newUser('hello');
+        let number = Math.round(Math.random(100) * 100);
+        const user = await app.core.newUser(number);
         console.log(user);
       });
     });

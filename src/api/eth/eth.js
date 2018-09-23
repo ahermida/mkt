@@ -1,27 +1,25 @@
 /**
- * Wavey core eth interacion
+ * Mkt core eth interacion
  */
-import { fromUtf8, toUtf8 } from 'ethjs';
-import abi from 'ethjs-abi';
 import Mkt from './Mkt.js';
 import User from './User.js';
 
 export default class Core {
 
-  constructor(eth, account, ec) {
-    this.eth = eth;
+  constructor(web3, account, ec) {
+    this.web3 = web3;
     this.account = account;
     this.ec = ec;
 
     //expects environment variable for mkt address & network
     const MKT_ADDRESS = process ? process.env.MKT_ADDRESS : "address";
-    this.mkt = new Mkt(this.eth, this.account, MKT_ADDRESS);
+    this.mkt = new Mkt(this.web3, this.account, MKT_ADDRESS);
   }
 
   //target user and return it
   async getUser(username) {
     const address = await this.mkt.getPublicKey(username);
-    return new User(this.eth, this.account, address);
+    return new User(this.web3, this.account, address);
   }
 
   //create new user
@@ -42,12 +40,12 @@ export default class Core {
       let counter = 0;
 
       //check if transaction was mined, when done switch routes
-      let checkForTransaction = window.setInterval(async () => {
-        let blockMined = await this.eth.getTransactionReceipt(tx);
+      let checkForTransaction = setInterval(async () => {
+        let blockMined = await this.web3.eth.getTransactionReceipt(tx);
         if (blockMined) {
           const addr = blockMined.contractAddress;
           const blockNum = blockMined.blockNumber.toString();
-          window.clearInterval(checkForTransaction);
+          clearInterval(checkForTransaction);
           resolve(addr);
         }
         if (++counter > 60) {
