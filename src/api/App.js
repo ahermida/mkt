@@ -12,15 +12,15 @@ import elliptic from 'elliptic';
 export default class App extends EventEmitter {
 
   //setup requires a user's id, eth, and optionally webrtc for Node.js Users
-  constructor({ipfs, id, pk, webrtc}) {
+  constructor({ipfs, id, pk, webrtc} = {}) {
     super();
     this.id = id;
-    this.pk = pk ? this.ec.keyFromSecret(pk, 'hex') : "";
+    this.ec = new elliptic.ec('secp256k1');
+    this.pk = pk ? this.ec.keysFromPrivate(pk, 'hex') : "";
     this.peers = {};
     this.ipfs = ipfs;
     this.webrtc = webrtc;
     this.core = null;
-    this.ec = new elliptic.ec('secp256k1');
     this.room = null;
 
     //setup eth api
@@ -45,7 +45,7 @@ export default class App extends EventEmitter {
     }
 
     //listen for messages in a room labeled by your name.
-    this.room = Room(ipfs, `mkt#${id}`);
+    this.room = Room(this.ipfs, `mkt#${id}`);
 
     //listen to eth booting up
     this.room.on('message', async (message) => {
