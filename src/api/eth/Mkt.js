@@ -14,7 +14,10 @@ export default class Mkt {
   //Get public key belonging to user
   async getPublicKey(name) {
     const result = await this.mkt.methods.getKey(utils.fromAscii(name)).call();
-    return result;
+
+    //since keys are stored in 2 parts, assemble them and reinsert the 04 prefix
+    const key = `04${result[0].slice(2)}${result[1].slice(2)}`;
+    return key;
   }
 
   //Insert a new user into the user registry, owned by sender

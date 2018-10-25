@@ -31,7 +31,7 @@ export default class Core {
       public: key.getPublic().encode('hex'),
       private: key.getPrivate().toString(16)
     };
-
+    
     //shoot out transaction
     const tx = await this.mkt.newUser(username, keys.public);
 

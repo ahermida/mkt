@@ -85,7 +85,7 @@ export default class Peer extends EventEmitter {
     this.rtc = new this.wrtc.RTCPeerConnection(this.RTCSettings);
     this.makeDataChannel();
     this.rtc.createOffer(desc => {
-      this.rtc.setLocalDescription(desc, function () {}, this.handleErr);
+      this.rtc.setLocalDescription(desc, () => {}, this.handleErr);
     }, this.handleErr);
     this.rtc.onicecandidate = c => {
       if (c.candidate == null) {

@@ -98,12 +98,15 @@ contract('Mkt', accounts => {
         const appU1 = new Mkt({ipfs: ipfsAlice, webrtc: wrtc})//, id: u1, pk: u1Info.private});
         const appU2 = new Mkt({ipfs: ipfsBob, webrtc: wrtc})//, id: u2, pk: u2Info.private});
         //once everything's setup, we'll create user
-        appU1.on('eth', () => appU2.on('eth', async () => {
+        appU1.on('eth', async () => appU2.on('eth', async () => {
           let u1 = await appU1.core.newUser(`${rn1}`);
           let u2 = await appU1.core.newUser(`${rn2}`);
+          console.log(`${rn1}`, u1.private, u1.public);
+          console.log(`${rn2}`, u1.private, u2.public);
           console.log('Successfully created 2 test users.');
-          appU1.listen(`${rn1}`, u1.private);
-          appU2.listen(`${rn2}`, u2.private);
+          await appU1.listen(`${rn1}`, u1.private);
+          await appU2.listen(`${rn2}`, u2.private);
+          await appU2.connect(`${rn1}`); //try to connect app 2 to app 1
         }));
       });
     });
