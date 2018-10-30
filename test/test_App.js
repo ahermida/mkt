@@ -13,6 +13,11 @@ const EventEmitter = require('events');
 let rn1 = Math.round(Math.random() * 1000);
 let rn2 = Math.round(Math.random() * 5000);
 
+async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
 //get provider
 async function getWeb3() {
   let provider;
@@ -101,14 +106,15 @@ contract('Mkt', accounts => {
         appU1.on('eth', async () => appU2.on('eth', async () => {
           let u1 = await appU1.core.newUser(`${rn1}`);
           let u2 = await appU1.core.newUser(`${rn2}`);
-          console.log(`${rn1}`, u1.private, u1.public);
-          console.log(`${rn2}`, u1.private, u2.public);
+        //  await sleep(2000);
           console.log('Successfully created 2 test users.');
           await appU1.listen(`${rn1}`, u1.private);
           await appU2.listen(`${rn2}`, u2.private);
-          await appU2.connect(`${rn1}`); //try to connect app 2 to app 1
+          await appU1.connect(`${rn2}`); //try to connect app 2 to app 1
+          appU1.peers[`rn2`].send('hello!');
         }));
       });
+      return sleep(10000);
     });
   });
 });

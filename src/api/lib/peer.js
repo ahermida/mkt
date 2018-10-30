@@ -7,9 +7,10 @@ import sjcl from 'sjcl';
 export default class Peer extends EventEmitter {
 
   //pass in id, shared key, channel, and optionally WebRTC (as a module) in case we're in Node.
-  constructor(id, sk, channel, wrtc) {
+  constructor(id, user, sk, channel, wrtc) {
     super();
     this.id = id;
+    this.user = user; // their id, not ours
     this.channel = channel;
     this.wrtc = wrtc ? wrtc : { RTCPeerConnection, RTCIceCandidate, RTCSessionDescription };
     this.rtc = null;
@@ -17,12 +18,16 @@ export default class Peer extends EventEmitter {
     this.sk = sk;
     this.mq = [];
     this.RTCSettings = {
-      iceServers: [
-        {url:'stun:stun.l.google.com:19302'},
-        {url:'stun:stun1.l.google.com:19302'},
-        {url:'stun:stun2.l.google.com:19302'},
-        {url:'stun:stun3.l.google.com:19302'},
-        {url:'stun:stun4.l.google.com:19302'},
+      'iceServers': [
+        {
+          'urls': [
+            'stun:stun.l.google.com:19302',
+            'stun:stun1.l.google.com:19302',
+            'stun:stun2.l.google.com:19302',
+            'stun:stun3.l.google.com:19302',
+            'stun:stun4.l.google.com:19302',
+          ],
+        },
       ],
     };
 
@@ -42,21 +47,23 @@ export default class Peer extends EventEmitter {
     this.channel.on('message', m => {
       let parsed;
       try {
-        parsed = JSON.parse(m);
+        parsed = JSON.parse(m.data.toString());
       } catch (e) {
-        console.log('Malformed JSON on signaling message.');
+        console.log('Malformed JSON on signaling message.', JSON.stringify(m.data.toString()));
         return;
       }
-      if (parsed.offer) {
-        let offer = decrypt(parsed.offer);
-        if (offer) {
-          this.respond(offer);
-        }
-      } else if (parsed.answer) {
-        let answer = decrypt(parsed.answer);
-        if (answer) {
-          this.getAnswer(answer);
-        }
+
+      //hop out if this is our message
+      if (parsed.id == this.id)
+        return;
+
+      if (parsed.answer && !this.answered) {
+        console.log(`GOT ANSWER AS ${this.id} FROM ${this.user}`);
+        this.answered = true;
+        this.getAnswer(parsed.answer);
+      } else if (parsed.offer) {
+        console.log(`GOT OFFER AS ${this.id} FROM ${this.user}`);
+        this.respond(parsed.offer);
       }
     });
   }
@@ -106,16 +113,19 @@ export default class Peer extends EventEmitter {
   }
 
   //respond to an offer
-  respond(data) {
+  respond(parsed) {
+
+    //get offer text
+    let offer = this.decrypt(parsed);
 
     //ensure that we're listening
-    let desc = new this.wrtc.RTCSessionDescription(data);
+    let desc = new this.wrtc.RTCSessionDescription(offer);
     this.rtc = new this.wrtc.RTCPeerConnection(this.RTCSettings);
     this.rtc.onicecandidate = e => {
       if (e.candidate == null) {
         this.sendAnswer();
       }
-    }
+    };
     this.handleDataChannel(desc);
 
     //again, for chaining
@@ -130,7 +140,7 @@ export default class Peer extends EventEmitter {
       this.dataChannel.onerror = this.handleErr;
     };
 
-    this.rtc.setRemoteDescription(desc, this.createAnswer, this.handleErr);
+    this.rtc.setRemoteDescription(desc, this.createAnswer.bind(this), this.handleErr);
   }
 
   makeDataChannel() {
@@ -145,6 +155,7 @@ export default class Peer extends EventEmitter {
 
   //send over the answer
   sendAnswer() {
+    console.log(`SENDING ANSWER FROM ${this.id} to ${this.user}`);
     let answer = this.rtc.localDescription;
     answer = sjcl.encrypt(this.sk, JSON.stringify(answer));
     this.channel.send(JSON.stringify({
@@ -154,6 +165,7 @@ export default class Peer extends EventEmitter {
   }
 
   sendOffer() {
+    console.log(`SENDING OFFER FROM ${this.id} to ${this.user}`);
     let offer = this.rtc.localDescription;
     offer = sjcl.encrypt(this.sk, JSON.stringify(offer));
     this.channel.send(JSON.stringify({
@@ -163,14 +175,15 @@ export default class Peer extends EventEmitter {
   }
 
   createAnswer() {
-    this.rtc.createAnswer(this.setLocalDesc, this.handleErr);
+    this.rtc.createAnswer(this.setLocalDesc.bind(this), this.handleErr);
   }
 
   setLocalDesc(desc) {
     this.rtc.setLocalDescription(desc, () => {}, this.handeErr);
   }
 
-  getAnswer(data) {
+  getAnswer(parsed) {
+    let data = this.decrypt(parsed);
     let answer = new this.wrtc.RTCSessionDescription(data);
     this.rtc.setRemoteDescription(answer);
   }
@@ -183,7 +196,7 @@ export default class Peer extends EventEmitter {
   decrypt(obj) {
     let parsed;
     try {
-      let str = sjcl.decrypt(sk, obj);
+      let str = sjcl.decrypt(this.sk, obj);
       parsed = JSON.parse(str);
     } catch (e) {
       console.log('Error in trying to decrypt signaling data. Did you use the proper shared key?');
