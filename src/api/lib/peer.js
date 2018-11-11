@@ -37,6 +37,7 @@ export default class Peer extends EventEmitter {
 
     //let's empty the queue on connection
     this.on('connection', () => {
+      console.log("NEW CONNECTION");
       if (this.connected()) {
         while(this.mq.length)
           this.send(this.mq.shift());
@@ -58,11 +59,9 @@ export default class Peer extends EventEmitter {
         return;
 
       if (parsed.answer && !this.answered) {
-        console.log(`GOT ANSWER AS ${this.id} FROM ${this.user}`);
         this.answered = true;
         this.getAnswer(parsed.answer);
       } else if (parsed.offer) {
-        console.log(`GOT OFFER AS ${this.id} FROM ${this.user}`);
         this.respond(parsed.offer);
       }
     });
@@ -72,9 +71,10 @@ export default class Peer extends EventEmitter {
   send(message) {
     if (!this.connected) {
       this.mq.push(message);
+    } else {
+      this.dataChannel.send(message);
+      this.emit('sent', message);
     }
-    this.dataChannel.send(message);
-    this.emit('sent', message);
   }
 
   //hanle incoming data
@@ -155,7 +155,6 @@ export default class Peer extends EventEmitter {
 
   //send over the answer
   sendAnswer() {
-    console.log(`SENDING ANSWER FROM ${this.id} to ${this.user}`);
     let answer = this.rtc.localDescription;
     answer = sjcl.encrypt(this.sk, JSON.stringify(answer));
     this.channel.send(JSON.stringify({
@@ -165,7 +164,6 @@ export default class Peer extends EventEmitter {
   }
 
   sendOffer() {
-    console.log(`SENDING OFFER FROM ${this.id} to ${this.user}`);
     let offer = this.rtc.localDescription;
     offer = sjcl.encrypt(this.sk, JSON.stringify(offer));
     this.channel.send(JSON.stringify({

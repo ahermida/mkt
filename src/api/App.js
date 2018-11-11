@@ -74,17 +74,12 @@ export default class App extends EventEmitter {
 
         //if peer not yet seen, derive sk and try to create peer
         let peerID = parsed.id;
+
+        //if message is feedback, return out of it
         if (peerID == id)
           return;
 
-        if (this.peers[peerID]) {
-
-          //if peer exists and has an answer, let's respond appropriately
-          if (parsed.answer)
-          console.log(`GOT ANSWER AS ${id} FROM ${peerID} in listener`)
-          //  this.peers[peerID].getAnswer(parsed.answer);
-        } else {
-          console.log(`GOT OFFER AS ${id} FROM ${peerID} in listener`)
+        if (!this.peers[peerID]) {
           this.getPeer(peerID, {rm: this.room, offer: parsed.offer});
         }
       });
@@ -118,11 +113,12 @@ export default class App extends EventEmitter {
 
       //mark user as true for signaling purposes
       this.peers[username] = true;
+
+      //check if contract contains user
       const user = await this.core.mkt.contains(username);
 
       if (user) {
         const sk = await this._deriveSK(username);
-        console.log("SK", sk);
 
         //make new room for user if we didn't get one passed in
         const room = rm ? rm : await this.getRoom(username);

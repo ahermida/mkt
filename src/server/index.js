@@ -9,7 +9,7 @@ const app = express();
 
 //mount the 2 important folders to static
 app.use('/static', express.static('static'));
-app.use('/static', express.static('dist'));
+app.use('/static', express.static('build'));
 
 //because who wants to have to decode JSON
 app.use(bodyParser.json());

@@ -99,7 +99,7 @@ contract('Mkt', accounts => {
       });
 
       //test the 2 users
-      emitter.on('contract', async (u1, u2) => {
+      emitter.on('contract', async () => {
         const appU1 = new Mkt({ipfs: ipfsAlice, webrtc: wrtc})//, id: u1, pk: u1Info.private});
         const appU2 = new Mkt({ipfs: ipfsBob, webrtc: wrtc})//, id: u2, pk: u2Info.private});
         //once everything's setup, we'll create user
@@ -111,9 +111,18 @@ contract('Mkt', accounts => {
           await appU1.listen(`${rn1}`, u1.private);
           await appU2.listen(`${rn2}`, u2.private);
           await appU1.connect(`${rn2}`); //try to connect app 2 to app 1
-          appU1.peers[`rn2`].send('hello!');
+          appU1.peers[`${rn2}`].on('connection', () => {
+            appU2.peers[`${rn1}`].on('connection', () => {
+              appU1.peers[`${rn2}`].on('message', m => console.log("MESSAGE: ", m));
+              appU2.peers[`${rn1}`].on('message', m => console.log("MESSAGE: ", m));
+              appU2.peers[`${rn1}`].send('hello from Alice!');
+              appU1.peers[`${rn2}`].send('hello from Bob!');
+            });
+          });
         }));
       });
+
+      //because I can't promise for the life of me
       return sleep(10000);
     });
   });

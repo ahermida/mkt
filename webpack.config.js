@@ -3,6 +3,7 @@ const webpack = require('webpack');
 const nodeExternals = require('webpack-node-externals');
 
 const nodeCommon = {
+  target: 'node',
   devtool: 'eval',
   resolve: {
     extensions: ['.js']
@@ -17,9 +18,11 @@ const nodeCommon = {
       }
     ]
   },
+  externals: [nodeExternals()],
 };
 
 const clientCommon = {
+  target: 'web',
   devtool: 'eval',
   module: {
     rules: [
@@ -50,8 +53,6 @@ const client = {
 const server = {
   entry: ['babel-polyfill','./src/server/index.js'],
   output: { path: __dirname + '/build/js', filename: 'server.bundle.js' },
-  target: 'node',
-  externals: [nodeExternals()],
 };
 
 const api = {
@@ -61,8 +62,6 @@ const api = {
     libraryTarget: 'umd',
     filename: 'api.node.bundle.js',
   },
-  target: 'node',
-  externals: [nodeExternals()],
 };
 
 const clientApi = {
@@ -73,8 +72,17 @@ const clientApi = {
   },
 };
 
+const client = {
+  entry: ['babel-polyfill', './src/client/index.js'],
+  output: {
+    path: __dirname + '/build/js',
+    filename: 'client.bundle.js',
+  },
+}
+
 module.exports = [
   Object.assign({}, nodeCommon, server),
   Object.assign({}, nodeCommon, api),
   Object.assign({}, clientCommon, clientApi),
+  Object.assign({}, clientCommon, client),
 ];

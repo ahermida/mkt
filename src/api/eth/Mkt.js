@@ -11,6 +11,16 @@ export default class Mkt {
     });
   }
 
+  //deploy contract because
+  async deploy() {
+    const mk = await this.mkt.deploy({
+      from: this.account,
+      data: mkt.data,
+    }).send({from: this.account, gas: 5000000});
+    await mk.methods.initialize(this.account).send({from: this.account, gas: 3000000});
+    this.mkt = mk;
+  }
+
   //Get public key belonging to user
   async getPublicKey(name) {
     const result = await this.mkt.methods.getKey(utils.fromAscii(name)).call();
